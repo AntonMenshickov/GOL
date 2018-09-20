@@ -40,6 +40,14 @@ const gol = function () {
         }
     };
 
+    const cleaBuffer = function () {
+        for (let i = 0; i < width; i++) {
+            for (let j = 0; j < height; j++) {
+                fieldBuffer[i][j] = 0;
+            }
+        }
+    };
+
     const eraseField = function () {
         context.fillStyle = deadColor;
         context.fillRect(0, 0, width * scale, height * scale);
@@ -101,6 +109,7 @@ const gol = function () {
         const f = field;
         field = fieldBuffer;
         fieldBuffer = f;
+        cleaBuffer();
     };
 
     function loop() {
@@ -132,7 +141,7 @@ const gol = function () {
 
     document.getElementById('size').addEventListener('input', function (e) {
         pause = true;
-        requestAnimationFrame(function() {
+        requestAnimationFrame(function () {
             width = height = e.target.value;
             canvas.width = canvas.height = width * scale;
             createField();
@@ -142,7 +151,7 @@ const gol = function () {
 
     document.getElementById('scale').addEventListener('input', function (e) {
         pause = true;
-        requestAnimationFrame(function() {
+        requestAnimationFrame(function () {
             scale = e.target.value;
             canvas.width = canvas.height = width * scale;
             createField();
