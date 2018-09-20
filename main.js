@@ -132,7 +132,7 @@ const gol = function () {
         requestAnimationFrame(function () {
             width = height = parseInt(e.target.value);
             if (width !== width || !width) {
-                width = height = 1;
+                width = height = 3;
             }
             canvas.width = canvas.height = width * scale;
             createField();
