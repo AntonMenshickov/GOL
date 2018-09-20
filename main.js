@@ -131,7 +131,7 @@ const gol = function () {
         pause = true;
         requestAnimationFrame(function () {
             width = height = parseInt(e.target.value);
-            if (width !== width) {
+            if (width !== width || !width) {
                 width = height = 1;
             }
             canvas.width = canvas.height = width * scale;
