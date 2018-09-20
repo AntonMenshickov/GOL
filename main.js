@@ -130,7 +130,10 @@ const gol = function () {
     document.getElementById('size').addEventListener('input', function (e) {
         pause = true;
         requestAnimationFrame(function () {
-            width = height = e.target.value;
+            width = height = parseInt(e.target.value);
+            if (width !== width) {
+                width = height = 1;
+            }
             canvas.width = canvas.height = width * scale;
             createField();
             drawField();
