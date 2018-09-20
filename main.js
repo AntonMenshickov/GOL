@@ -14,12 +14,12 @@ const gol = function () {
 
     const translateX = function (x) {
         const w = width - 1;
-        return x < 0 ? w + x : x > w ? x - w : x;
+        return x < 0 ? w + x : x > w ? x - width : x;
     };
 
     const translateY = function (y) {
         const h = height - 1;
-        return y < 0 ? h + y : y > h ? y - h : y;
+        return y < 0 ? h + y : y > h ? y - height : y;
     };
 
     const drawCell = function (x, y) {
@@ -82,13 +82,15 @@ const gol = function () {
     };
 
     const step = function () {
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
+        for (let i = -1; i < width + 1; i++) {
+            for (let j = -1; j < height + 1; j++) {
+                const tX = translateX(i);
+                const tY = translateY(j);
                 const aliveAround = getAliveNumber(i, j);
                 if (isAlive(i, j)) {
-                    fieldBuffer[i][j] = (aliveAround === 2 || aliveAround === 3);
+                    fieldBuffer[tX][tY] = (aliveAround === 2 || aliveAround === 3);
                 } else {
-                    fieldBuffer[i][j] = aliveAround === 3;
+                    fieldBuffer[tX][tY] = aliveAround === 3;
                 }
             }
         }
