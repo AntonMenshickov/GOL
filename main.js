@@ -11,6 +11,17 @@ const gol = function () {
     const canvas = document.getElementById('field');
     const context = canvas.getContext('2d');
 
+
+    const translateX = function (x) {
+        const w = width - 1;
+        return x < 0 ? w + x : x > w ? x - w : x;
+    };
+
+    const translateY = function (y) {
+        const h = height - 1;
+        return y < 0 ? h + y : y > h ? y - h : y;
+    };
+
     const drawCell = function (x, y) {
         context.fillStyle = aliveColor;
         context.fillRect(translateX(x) * scale, translateY(y) * scale, scale, scale);
@@ -40,14 +51,6 @@ const gol = function () {
         }
     };
 
-    const cleaBuffer = function () {
-        for (let i = 0; i < width; i++) {
-            for (let j = 0; j < height; j++) {
-                fieldBuffer[i][j] = 0;
-            }
-        }
-    };
-
     const eraseField = function () {
         context.fillStyle = deadColor;
         context.fillRect(0, 0, width * scale, height * scale);
@@ -57,19 +60,9 @@ const gol = function () {
         eraseField();
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                fieldBuffer[i][j] && drawCell(i, j);
+                field[i][j] && drawCell(i, j);
             }
         }
-    };
-
-    const translateX = function (x) {
-        const w = width - 1;
-        return x < 0 ? w + x : x > w ? x - w : x;
-    };
-
-    const translateY = function (y) {
-        const h = height - 1;
-        return y < 0 ? h + y : y > h ? y - h : y;
     };
 
     const getAliveNumber = function (x, y) {
@@ -85,7 +78,7 @@ const gol = function () {
     };
 
     const isAlive = function (x, y) {
-        return field[translateX(x)][translateY(y)] === 1;
+        return field[translateX(x)][translateY(y)];
     };
 
     const step = function () {
@@ -93,13 +86,9 @@ const gol = function () {
             for (let j = 0; j < height; j++) {
                 const aliveAround = getAliveNumber(i, j);
                 if (isAlive(i, j)) {
-                    if (aliveAround < 2 || aliveAround > 3) {
-                        fieldBuffer[i][j] = false;
-                    }
+                    fieldBuffer[i][j] = (aliveAround === 2 || aliveAround === 3);
                 } else {
-                    if (aliveAround === 3) {
-                        fieldBuffer[i][j] = true;
-                    }
+                    fieldBuffer[i][j] = aliveAround === 3;
                 }
             }
         }
@@ -109,7 +98,6 @@ const gol = function () {
         const f = field;
         field = fieldBuffer;
         fieldBuffer = f;
-        cleaBuffer();
     };
 
     function loop() {
@@ -118,8 +106,8 @@ const gol = function () {
             return;
         }
         step();
-        drawField();
         swap();
+        drawField();
     }
 
     canvas.addEventListener('click', function (e) {
@@ -127,7 +115,7 @@ const gol = function () {
         const y = Math.floor(e.layerY / scale);
         field[x][y] = !field[x][y];
         field[x][y] ? drawCell(x, y) : eraseCell(x, y);
-    }, false);
+    });
 
     document.getElementById('playPuse').addEventListener('click', function () {
         pause = !pause;
@@ -150,7 +138,6 @@ const gol = function () {
     });
 
     document.getElementById('scale').addEventListener('input', function (e) {
-        pause = true;
         requestAnimationFrame(function () {
             scale = e.target.value;
             canvas.width = canvas.height = width * scale;
