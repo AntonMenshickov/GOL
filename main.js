@@ -38,7 +38,7 @@ const gol = function () {
 
     const eraseCell = function (x, y) {
         context.fillStyle = deadColor;
-        context.fillRect(translateX(x) * scale, translateY(y) * scale, scale, scale);
+        context.fillRect(translateX(x) * scale + offsetX, translateY(y) * scale + offsetY, scale, scale);
     };
 
     const createField = function () {
