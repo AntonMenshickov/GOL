@@ -7,10 +7,16 @@
 </head>
 <body>
 <canvas id="field" width="300" height="300"></canvas>
-<button id="playPuse">Play/pause</button>
-<button id="random">Random</button>
-<input id="size" type="number" placeholder="field side" value="30"/>
-<input id="scale" type="number" placeholder="field side" value="10" min="1"/>
+<div class="controls">
+    <button id="playPuse">Play</button>
+    <button id="random">Random</button>
+    <label for="framerate">Framerate: </label>
+    <input id="framerate" type="range" min="1" max="60" value="60">
+    <label for="Size">Field size: </label>
+    <input id="size" type="range" value="30" min="3" max="1000"/>
+    <label for="scale">Cell scale: </label>
+    <input id="scale" type="range" value="10" min="1" max="100"/>
+</div>
 <script src="main.js"></script>
 </body>
 </html>
