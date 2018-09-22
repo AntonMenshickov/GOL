@@ -16,6 +16,9 @@ const gol = function () {
     let offsetX = (canvas.width - width * scale) / 2;
     let offsetY = (canvas.height - height * scale) / 2;
 
+    const flatten = function (x, y) {
+        return y * width + x;
+    };
 
     const translateX = function (x) {
         const w = width - 1;
@@ -42,13 +45,9 @@ const gol = function () {
     };
 
     const createField = function () {
-        for (let i = 0; i < width; i++) {
-            field.push([]);
-            fieldBuffer.push([]);
-            for (let j = 0; j < height; j++) {
-                field[i].push(false);
-                fieldBuffer[i].push(false);
-            }
+        for (let i = 0; i < width * height; i++) {
+            field.push(false);
+            fieldBuffer.push(false);
         }
     };
 
@@ -59,17 +58,10 @@ const gol = function () {
         if (h !== h || !h) {
             h = 3;
         }
-
-        for (let i = 0; i < w; i++) {
+        for (let i = 0; i < w * h; i++) {
             if (!field[i]) {
-                field.push([]);
-                fieldBuffer.push([]);
-            }
-            for (let j = 0; j < h; j++) {
-                if (!field[i][j]) {
-                    field[i].push(false);
-                    fieldBuffer[i].push(false);
-                }
+                field.push(false);
+                fieldBuffer.push(false);
             }
         }
     };
@@ -77,7 +69,7 @@ const gol = function () {
     const fillRandom = function () {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                field[i][j] = fieldBuffer[i][j] = !!Math.round(Math.random());
+                field[flatten(i, j)] = fieldBuffer[flatten(i, j)] = !!Math.round(Math.random());
             }
         }
     };
@@ -93,16 +85,16 @@ const gol = function () {
         eraseField();
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                field[i][j] && drawCell(i, j);
+                field[flatten(i, j)] && drawCell(i, j);
             }
         }
     };
 
     const getAliveNumber = function (x, y) {
-        let alive = -field[translateX(x)][translateY(y)];
+        let alive = -field[flatten(translateX(x), translateY(y))];
         for (let i = x - 1; i <= x + 1; i++) {
             for (let j = y - 1; j <= y + 1; j++) {
-                if (field[translateX(i)][translateY(j)]) {
+                if (field[flatten(translateX(i), translateY(j))]) {
                     alive++;
                 }
             }
@@ -111,7 +103,7 @@ const gol = function () {
     };
 
     const isAlive = function (x, y) {
-        return field[translateX(x)][translateY(y)];
+        return field[flatten(translateX(x), translateY(y))];
     };
 
     const step = function () {
@@ -121,9 +113,9 @@ const gol = function () {
                 const tY = translateY(j);
                 const aliveAround = getAliveNumber(i, j);
                 if (isAlive(i, j)) {
-                    fieldBuffer[tX][tY] = (aliveAround === 2 || aliveAround === 3);
+                    fieldBuffer[flatten(tX, tY)] = (aliveAround === 2 || aliveAround === 3);
                 } else {
-                    fieldBuffer[tX][tY] = aliveAround === 3;
+                    fieldBuffer[flatten(tX, tY)] = aliveAround === 3;
                 }
             }
         }
@@ -147,7 +139,7 @@ const gol = function () {
         }, 1000 / framerate)
     }
 
-    const setPause = function(p) {
+    const setPause = function (p) {
         pause = p;
         document.getElementById('playPuse').innerText = pause ? 'Play' : 'Pause';
     };
@@ -155,8 +147,8 @@ const gol = function () {
     canvas.addEventListener('click', function (e) {
         const x = translateX(Math.floor((e.layerX - offsetX) / scale));
         const y = translateY(Math.floor((e.layerY - offsetY) / scale));
-        field[x][y] = !field[x][y];
-        field[x][y] ? drawCell(x, y) : eraseCell(x, y);
+        field[flatten(x, y)] = !field[flatten(x, y)];
+        field[flatten(x, y)] ? drawCell(x, y) : eraseCell(x, y);
     });
 
     document.getElementById('playPuse').addEventListener('click', function () {
