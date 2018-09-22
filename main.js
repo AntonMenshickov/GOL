@@ -16,8 +16,8 @@ const gol = function () {
     let offsetX = (canvas.width - width * scale) / 2;
     let offsetY = (canvas.height - height * scale) / 2;
 
-    const flatten = function (x, y) {
-        return y * width + x;
+    const flatten = function (x, y, w) {
+        return y * w + x;
     };
 
     const translateX = function (x) {
@@ -51,25 +51,36 @@ const gol = function () {
         }
     };
 
-    const resizeField = function (w, h) {
+
+    const resizeField = function (w, h, oldW, oldH) {
         if (w !== w || !w) {
             w = 3;
         }
         if (h !== h || !h) {
             h = 3;
         }
-        for (let i = 0; i < w * h; i++) {
-            if (!field[i]) {
-                field.push(false);
-                fieldBuffer.push(false);
+        const resized = [];
+        const resizedBuffer = [];
+        for (let i = 0; i < w; i++) {
+            for (let j = 0; j < h; j++) {
+                if (i < oldW && j < oldH) {
+                    resized.push(field[flatten(i, j, oldW)]);
+                    resizedBuffer.push(fieldBuffer[flatten(i, j, oldW)]);
+                } else {
+                    resized.push(false);
+                    resizedBuffer.push(false);
+                }
             }
         }
+        field = resized;
+        fieldBuffer = resizedBuffer;
     };
 
     const fillRandom = function () {
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                field[flatten(i, j)] = fieldBuffer[flatten(i, j)] = !!Math.round(Math.random());
+                const translated = flatten(i, j, width);
+                field[translated] = fieldBuffer[translated] = !!Math.round(Math.random());
             }
         }
     };
@@ -85,16 +96,17 @@ const gol = function () {
         eraseField();
         for (let i = 0; i < width; i++) {
             for (let j = 0; j < height; j++) {
-                field[flatten(i, j)] && drawCell(i, j);
+                field[flatten(i, j, width)] && drawCell(i, j);
             }
         }
     };
 
     const getAliveNumber = function (x, y) {
-        let alive = -field[flatten(translateX(x), translateY(y))];
+        const translated = flatten(translateX(x), translateY(y), width);
+        let alive = -field[translated];
         for (let i = x - 1; i <= x + 1; i++) {
             for (let j = y - 1; j <= y + 1; j++) {
-                if (field[flatten(translateX(i), translateY(j))]) {
+                if (field[flatten(translateX(i), translateY(j), width)]) {
                     alive++;
                 }
             }
@@ -103,7 +115,7 @@ const gol = function () {
     };
 
     const isAlive = function (x, y) {
-        return field[flatten(translateX(x), translateY(y))];
+        return field[flatten(translateX(x), translateY(y), width)];
     };
 
     const step = function () {
@@ -111,11 +123,12 @@ const gol = function () {
             for (let j = -1; j < height + 1; j++) {
                 const tX = translateX(i);
                 const tY = translateY(j);
+                const translated = flatten(tX, tY, width);
                 const aliveAround = getAliveNumber(i, j);
                 if (isAlive(i, j)) {
-                    fieldBuffer[flatten(tX, tY)] = (aliveAround === 2 || aliveAround === 3);
+                    fieldBuffer[translated] = (aliveAround === 2 || aliveAround === 3);
                 } else {
-                    fieldBuffer[flatten(tX, tY)] = aliveAround === 3;
+                    fieldBuffer[translated] = aliveAround === 3;
                 }
             }
         }
@@ -128,6 +141,16 @@ const gol = function () {
     };
 
     function loop() {
+        if (framerate > 59) {
+            requestAnimationFrame(loop);
+            if (pause) {
+                return;
+            }
+            step();
+            swap();
+            drawField();
+            return;
+        }
         setTimeout(function () {
             requestAnimationFrame(loop);
             if (pause) {
@@ -147,8 +170,9 @@ const gol = function () {
     canvas.addEventListener('click', function (e) {
         const x = translateX(Math.floor((e.layerX - offsetX) / scale));
         const y = translateY(Math.floor((e.layerY - offsetY) / scale));
-        field[flatten(x, y)] = !field[flatten(x, y)];
-        field[flatten(x, y)] ? drawCell(x, y) : eraseCell(x, y);
+        const translated = flatten(x, y, width);
+        field[translated] = !field[translated];
+        field[translated] ? drawCell(x, y) : eraseCell(x, y);
     });
 
     document.getElementById('playPuse').addEventListener('click', function () {
@@ -162,6 +186,8 @@ const gol = function () {
 
     document.getElementById('size').addEventListener('input', function (e) {
         requestAnimationFrame(function () {
+            const oldW = width;
+            const oldH = height;
             width = height = parseInt(e.target.value);
             if (width !== width || !width) {
                 width = height = 3;
@@ -169,7 +195,7 @@ const gol = function () {
             document.getElementById('scale').value = scale = Math.min(canvas.width, canvas.height) / Math.max(width, height);
             offsetX = (canvas.width - width * scale) / 2;
             offsetY = (canvas.height - height * scale) / 2;
-            resizeField(width, height);
+            resizeField(width, height, oldW, oldH);
             drawField();
         })
     });
@@ -177,10 +203,12 @@ const gol = function () {
     document.getElementById('scale').addEventListener('input', function (e) {
         requestAnimationFrame(function () {
             scale = e.target.value;
+            const oldW = width;
+            const oldH = height;
             document.getElementById('size').value = width = height = Math.floor(Math.min(canvas.width, canvas.height) / scale);
             offsetX = (canvas.width - width * scale) / 2;
             offsetY = (canvas.height - height * scale) / 2;
-            resizeField(width, height);
+            resizeField(width, height, oldW, oldH);
             drawField();
         })
     });
