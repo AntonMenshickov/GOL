@@ -61,8 +61,8 @@ const gol = function () {
         }
         const resized = [];
         const resizedBuffer = [];
-        for (let i = 0; i < w; i++) {
             for (let j = 0; j < h; j++) {
+                for (let i = 0; i < w; i++) {
                 if (i < oldW && j < oldH) {
                     resized.push(field[flatten(i, j, oldW)]);
                     resizedBuffer.push(fieldBuffer[flatten(i, j, oldW)]);
